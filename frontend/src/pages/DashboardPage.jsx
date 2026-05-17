@@ -5,6 +5,9 @@ import api from '../api/api'
 function DashboardPage() {
   const { logout } = useAuth()
   const [tasks, setTasks] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [priorityFilter, setPriorityFilter] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({
     title: '',
@@ -118,6 +121,18 @@ function DashboardPage() {
         label: labels[status] || 'Pendiente',
     }
     }
+    const filteredTasks = tasks.filter((task) => {
+    const search = searchTerm.toLowerCase()
+
+    const matchesSearch =
+        task.title.toLowerCase().includes(search) ||
+        (task.description || '').toLowerCase().includes(search)
+
+    const matchesStatus = statusFilter ? task.status === statusFilter : true
+    const matchesPriority = priorityFilter ? task.priority === priorityFilter : true
+
+    return matchesSearch && matchesStatus && matchesPriority
+    })
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -198,10 +213,43 @@ function DashboardPage() {
     </button>
     </form>
 
+    
+
         <div className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6">
           <h2 className="text-xl font-semibold">Listado de tareas</h2>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar por título o descripción"
+            className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+        />
 
-          {tasks.length === 0 ? (
+        <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+        >
+            <option value="">Todos los estados</option>
+            <option value="pending">Pendiente</option>
+            <option value="in_progress">En proceso</option>
+            <option value="completed">Completada</option>
+        </select>
+
+        <select
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value)}
+            className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
+        >
+            <option value="">Todas las prioridades</option>
+            <option value="low">Baja</option>
+            <option value="medium">Media</option>
+            <option value="high">Alta</option>
+        </select>
+        </div>
+
+          {filteredTasks.length === 0 ? (
             <p className="mt-4 text-slate-400">No hay tareas registradas.</p>
           ) : (
             <div className="mt-4 overflow-x-auto">
@@ -216,7 +264,7 @@ function DashboardPage() {
                 </thead>
 
                 <tbody>
-                  {tasks.map((task) => (
+                  {filteredTasks.map((task) => (
                     <tr key={task.id} className="border-b border-slate-800">
                       <td className="py-3">{task.title}</td>
                       <td className="py-3">
