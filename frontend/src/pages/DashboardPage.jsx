@@ -5,6 +5,7 @@ import api from '../api/api'
 function DashboardPage() {
   const { logout } = useAuth()
   const [tasks, setTasks] = useState([])
+  const [editingId, setEditingId] = useState(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -24,13 +25,19 @@ function DashboardPage() {
     })
     }
 
-    async function createTask(e) {
+    async function saveTask(e) {
     e.preventDefault()
 
-    await api.post('/tasks', {
+    const payload = {
         ...formData,
         due_date: formData.due_date || null,
-    })
+    }
+
+    if (editingId) {
+        await api.put(`/tasks/${editingId}`, payload)
+    } else {
+        await api.post('/tasks', payload)
+    }
 
     setFormData({
         title: '',
@@ -39,6 +46,33 @@ function DashboardPage() {
         status: 'pending',
         due_date: '',
     })
+
+    setEditingId(null)
+    loadTasks()
+    }
+    
+    function editTask(task) {
+    setEditingId(task.id)
+
+    setFormData({
+        title: task.title || '',
+        description: task.description || '',
+        priority: task.priority || 'medium',
+        status: task.status || 'pending',
+        due_date: task.due_date || '',
+    })
+    }
+
+    async function deleteTask(id) {
+    const confirmed = window.confirm('¿Deseas eliminar esta tarea?')
+
+    if (!confirmed) return
+
+    await api.delete(`/tasks/${id}`)
+
+    if (editingId === id) {
+        setEditingId(null)
+    }
 
     loadTasks()
     }
@@ -58,9 +92,7 @@ function DashboardPage() {
 
           <button
             onClick={logout}
-            className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium hover:bg-red-700"
-          >
-            Cerrar sesión
+            className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium hover:bg-red-700">Cerrar sesión
           </button>
         </div>
       </header>
@@ -73,7 +105,7 @@ function DashboardPage() {
           </div>
         </div>
 
-        <form onSubmit={createTask} className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+        <form onSubmit={saveTask} className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6">
   <h2 className="text-xl font-semibold">Nueva tarea</h2>
 
     <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -84,8 +116,7 @@ function DashboardPage() {
         onChange={handleChange}
         placeholder="Título"
         className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-        required
-        />
+        required/>
 
         <input
         type="date"
@@ -99,8 +130,7 @@ function DashboardPage() {
         name="priority"
         value={formData.priority}
         onChange={handleChange}
-        className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-        >
+        className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white">
         <option value="low">Baja</option>
         <option value="medium">Media</option>
         <option value="high">Alta</option>
@@ -110,8 +140,7 @@ function DashboardPage() {
         name="status"
         value={formData.status}
         onChange={handleChange}
-        className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white"
-        >
+        className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white">
         <option value="pending">Pendiente</option>
         <option value="in_progress">En proceso</option>
         <option value="completed">Completada</option>
@@ -122,15 +151,12 @@ function DashboardPage() {
         value={formData.description}
         onChange={handleChange}
         placeholder="Descripción"
-        className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white md:col-span-2"
-        />
+        className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white md:col-span-2"/>
     </div>
 
     <button
         type="submit"
-        className="mt-4 rounded-xl bg-blue-600 px-5 py-3 font-medium text-white hover:bg-blue-700"
-    >
-        Guardar tarea
+        className="mt-4 rounded-xl bg-blue-600 px-5 py-3 font-medium text-white hover:bg-blue-700">{editingId ? 'Actualizar tarea' : 'Guardar tarea'}
     </button>
     </form>
 
@@ -144,6 +170,7 @@ function DashboardPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-800 text-left text-sm text-slate-400">
+                    <th className="py-3">Acciones</th>
                     <th className="py-3">Título</th>
                     <th className="py-3">Prioridad</th>
                     <th className="py-3">Estado</th>
@@ -156,6 +183,21 @@ function DashboardPage() {
                       <td className="py-3">{task.title}</td>
                       <td className="py-3">{task.priority}</td>
                       <td className="py-3">{task.status}</td>
+                      <td className="py-3">
+                        <div className="flex gap-2">
+                            <button
+                            type="button"
+                            onClick={() => editTask(task)}
+                            className="rounded-lg bg-amber-500 px-3 py-1 text-sm text-white hover:bg-amber-600">Editar
+                            </button>
+
+                            <button
+                            type="button"
+                            onClick={() => deleteTask(task.id)}
+                            className="rounded-lg bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700">Eliminar
+                            </button>
+                        </div>
+                        </td>
                     </tr>
                   ))}
                 </tbody>
