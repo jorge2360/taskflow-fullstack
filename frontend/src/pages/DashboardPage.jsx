@@ -81,6 +81,44 @@ function DashboardPage() {
     loadTasks()
   }, [])
 
+  function getPriorityBadge(priority) {
+    const styles = {
+        low: 'bg-emerald-100 text-emerald-700',
+        medium: 'bg-amber-100 text-amber-700',
+        high: 'bg-red-100 text-red-700',
+    }
+
+    const labels = {
+        low: 'Baja',
+        medium: 'Media',
+        high: 'Alta',
+    }
+
+    return {
+        className: styles[priority] || styles.medium,
+        label: labels[priority] || 'Media',
+    }
+    }
+
+    function getStatusBadge(status) {
+    const styles = {
+        pending: 'bg-slate-100 text-slate-700',
+        in_progress: 'bg-blue-100 text-blue-700',
+        completed: 'bg-emerald-100 text-emerald-700',
+    }
+
+    const labels = {
+        pending: 'Pendiente',
+        in_progress: 'En proceso',
+        completed: 'Completada',
+    }
+
+    return {
+        className: styles[status] || styles.pending,
+        label: labels[status] || 'Pendiente',
+    }
+    }
+
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <header className="border-b border-slate-800 bg-slate-900">
@@ -181,8 +219,16 @@ function DashboardPage() {
                   {tasks.map((task) => (
                     <tr key={task.id} className="border-b border-slate-800">
                       <td className="py-3">{task.title}</td>
-                      <td className="py-3">{task.priority}</td>
-                      <td className="py-3">{task.status}</td>
+                      <td className="py-3">
+                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${getPriorityBadge(task.priority).className}`}>
+                            {getPriorityBadge(task.priority).label}
+                        </span>
+                        </td>
+                      <td className="py-3">
+                        <span className={`rounded-full px-3 py-1 text-xs font-medium ${getStatusBadge(task.status).className}`}>
+                            {getStatusBadge(task.status).label}
+                        </span>
+                        </td>
                       <td className="py-3">
                         <div className="flex gap-2">
                             <button
