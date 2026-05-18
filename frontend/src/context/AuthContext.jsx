@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const navigate = useNavigate()
 
   async function login(formData) {
-    try {
+   
       const response = await api.post('/login', formData)
 
       localStorage.setItem('token', response.data.token)
@@ -18,14 +18,11 @@ export function AuthProvider({ children }) {
       setUser(response.data.user)
 
       navigate('/dashboard')
-    } catch (error) {
-      console.error(error)
-      alert('Credenciales incorrectas')
-    }
+    
   }
 
   async function register(formData) {
-    try {
+  
       const response = await api.post('/register', formData)
 
       localStorage.setItem('token', response.data.token)
@@ -33,10 +30,7 @@ export function AuthProvider({ children }) {
       setUser(response.data.user)
 
       navigate('/dashboard')
-    } catch (error) {
-      console.error(error)
-      alert('Error al registrar usuario')
-    }
+    
   }
 
   async function logout() {

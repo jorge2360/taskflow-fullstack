@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 
 function RegisterPage() {
   const { register } = useAuth()
-
+  const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,10 +19,15 @@ function RegisterPage() {
     })
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
 
-    register(formData)
+    try {
+      setErrorMessage('')
+      await register(formData)
+    } catch (error) {
+      setErrorMessage('No se pudo registrar el usuario. Verifique los datos ingresados.')
+    }
   }
 
   return (
@@ -31,6 +36,12 @@ function RegisterPage() {
         <h1 className="text-3xl font-bold text-white">
           Crear cuenta
         </h1>
+
+        {errorMessage && (
+          <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-300">
+            {errorMessage}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <input

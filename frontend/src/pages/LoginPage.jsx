@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 
 function LoginPage() {
   const { login } = useAuth()
-
+  const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -17,10 +17,15 @@ function LoginPage() {
     })
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
 
-    login(formData)
+    try {
+      setErrorMessage('')
+      await login(formData)
+    } catch (error) {
+      setErrorMessage('Credenciales incorrectas.')
+    }
   }
 
   return (
@@ -29,6 +34,12 @@ function LoginPage() {
         <h1 className="text-3xl font-bold text-white">
           Iniciar sesión
         </h1>
+
+        {errorMessage && (
+          <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-300">
+            {errorMessage}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <input

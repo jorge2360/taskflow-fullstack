@@ -9,6 +9,8 @@ function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [priorityFilter, setPriorityFilter] = useState('')
   const [editingId, setEditingId] = useState(null)
+  const [successMessage, setSuccessMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -29,29 +31,42 @@ function DashboardPage() {
     }
 
     async function saveTask(e) {
-    e.preventDefault()
+      e.preventDefault()
 
-    const payload = {
-        ...formData,
-        due_date: formData.due_date || null,
-    }
+      try {
+        const payload = {
+          ...formData,
+          due_date: formData.due_date || null,
+        }
 
-    if (editingId) {
-        await api.put(`/tasks/${editingId}`, payload)
-    } else {
-        await api.post('/tasks', payload)
-    }
+        if (editingId) {
+          await api.put(`/tasks/${editingId}`, payload)
+        } else {
+          await api.post('/tasks', payload)
+        }
 
-    setFormData({
-        title: '',
-        description: '',
-        priority: 'medium',
-        status: 'pending',
-        due_date: '',
-    })
+        setSuccessMessage(
+          editingId
+            ? 'Tarea actualizada correctamente.'
+            : 'Tarea creada correctamente.'
+        )
+        setErrorMessage('')
 
-    setEditingId(null)
-    loadTasks()
+        setFormData({
+          title: '',
+          description: '',
+          priority: 'medium',
+          status: 'pending',
+          due_date: '',
+        })
+
+        setEditingId(null)
+        loadTasks()
+      } catch (error) {
+        console.error(error)
+        setErrorMessage('Ocurrió un error al guardar la tarea.')
+        setSuccessMessage('')
+      }
     }
     
     function editTask(task) {
@@ -67,17 +82,26 @@ function DashboardPage() {
     }
 
     async function deleteTask(id) {
-    const confirmed = window.confirm('¿Deseas eliminar esta tarea?')
+      const confirmed = window.confirm('¿Deseas eliminar esta tarea?')
 
-    if (!confirmed) return
+      if (!confirmed) return
 
-    await api.delete(`/tasks/${id}`)
+      try {
+        await api.delete(`/tasks/${id}`)
 
-    if (editingId === id) {
-        setEditingId(null)
-    }
+        if (editingId === id) {
+          setEditingId(null)
+        }
 
-    loadTasks()
+        setSuccessMessage('Tarea eliminada correctamente.')
+        setErrorMessage('')
+
+        loadTasks()
+      } catch (error) {
+        console.error(error)
+        setErrorMessage('Ocurrió un error al eliminar la tarea.')
+        setSuccessMessage('')
+      }
     }
 
   useEffect(() => {
@@ -161,6 +185,17 @@ function DashboardPage() {
         <form onSubmit={saveTask} className="mt-8 rounded-2xl border border-slate-800 bg-slate-900 p-6">
   <h2 className="text-xl font-semibold">Nueva tarea</h2>
 
+    {successMessage && (
+      <div className="mb-6 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-emerald-300">
+        {successMessage}
+      </div>
+    )}
+
+    {errorMessage && (
+      <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-300">
+        {errorMessage}
+      </div>
+    )}
     <div className="mt-4 grid gap-4 md:grid-cols-2">
         <input
         type="text"
@@ -256,10 +291,10 @@ function DashboardPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-slate-800 text-left text-sm text-slate-400">
-                    <th className="py-3">Acciones</th>
                     <th className="py-3">Título</th>
                     <th className="py-3">Prioridad</th>
                     <th className="py-3">Estado</th>
+                    <th className="py-3">Acciones</th>
                   </tr>
                 </thead>
 
