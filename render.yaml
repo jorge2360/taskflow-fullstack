@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: taskflow-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: DB_CONNECTION
+        value: pgsql
