@@ -31,6 +31,7 @@ La aplicación permite:
 - Laravel Sanctum
 - API REST
 - Eloquent ORM
+- PostgreSQL
 
 ### Frontend
 
@@ -47,6 +48,8 @@ La aplicación permite:
 - Postman
 - Composer
 - npm
+- Render
+- Vercel
 
 ---
 
@@ -227,6 +230,14 @@ http://localhost:5173
 6. Usuario administra tareas desde el dashboard.
 
 ---
+
+## Demo en línea
+
+Frontend:
+https://taskflow-fullstack-eight.vercel.app
+
+Backend API:
+https://taskflow-fullstack-frnh.onrender.com/api
 
 ## Autor
 
